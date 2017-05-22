@@ -2,6 +2,7 @@ from telnetlib import Telnet
 from glob import glob
 from base64 import b64decode
 from time import sleep
+import os
 
 def get_id():
     f = open('identifier.base' , 'r')
@@ -69,6 +70,8 @@ def get_hostname(text):
 
 def writefile(hostname , utp=[] , fiber=[] , err=[]):
     try:
+        if not os.path.exists('Kitty/'):
+            os.makedirs('Kitty')
         filer = open('Kitty/counter.txt' , 'a')
         filer.write(hostname + '\n')
         wrUTP = 'UTP Total : ' + str(utp[0]) + '\rUp : ' + str(utp[1]) + '\rDown : ' + str(utp[2]) + '\rDisabled : ' + str(utp[3])
