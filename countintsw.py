@@ -13,9 +13,9 @@ def get_id():
 def split_lines(texts):
     texts = texts.split('\n')
     text_lst = []
-    for letter in texts:
-        if(letter.find('#') == -1):
-            text_lst.append(letter)
+    for rou in range(5):
+        if(texts[rou].find('#') == -1):
+            text_lst.append(texts[rou])
         else: pass
     text_lst = filter(None , text_lst)
     return text_lst
@@ -74,7 +74,9 @@ def calc_process(lst):
     cpu = cpu.split()
     cpu = cpu[-1]
     mem_total = mem[mem.find('Total:')+6 : mem.find('Used:')]
+    mem_total = mem_total.replace(',' , '')
     mem_used = mem[mem.find('Used:')+6 : mem.find('Free:')]
+    mem_used = mem_used.replace(',' , '')
     mem_avg = (float(mem_used) / int(mem_total)) * 100
     mem_avg = "{0:.2f}".format(mem_avg) + '%'
     return cpu , mem_avg
@@ -94,24 +96,34 @@ def get_hostname(text):
     return text
 
 def get_version(text):
-    texts = text[text.find('KickmeOff')+10 : text.find('HitmeOn')]
-    cleantext = split_lines(texts)
-    ios , uptime = select_version(cleantext)
-    print '[+] Get IOS Version and Uptime.'
-    return [ios , uptime]
+    try:
+        texts = text[text.find('KickmeOff')+10 : text.find('HitmeOn')]
+        cleantext = split_lines(texts)
+        ios , uptime = select_version(cleantext)
+        print '[+] Get IOS Version and Uptime.'
+        return [ios , uptime]
+    except ValueError:
+        print '[-] Something with show version Error.'
+        return ['' , '']
+    
 
 def get_process(text):
-    texts = text[text.find('HitmeOn')+8 : text.find('HitmeOff')]
-    cleantext = split_lines(texts)
-    cpu , mem = calc_process(cleantext)
-    print '[+] Get CPU and Memory Process.'
-    return [cpu , mem]
+    try:
+        texts = text[text.find('HitmeOn')+8 : text.find('HitmeOff')]
+        cleantext = split_lines(texts)
+        cpu , mem = calc_process(cleantext)
+        print '[+] Get CPU and Memory Process.'
+        return [cpu , mem]
+    except ValueError:
+        print '[-] Something with show process Error.'
+        return ['' , '']
+    
 
 def writefile(ip , hostname , int_status=[] , version=[] , process=[]):
     try:
         if not os.path.exists('Kitty/'):
             os.makedirs('Kitty')
-        filer = open('Kitty/counter.txt' , 'a')
+        filer = open('Kitty/'+ hostname +'.txt' , 'w')
         filer.write('Hostname: ' + hostname + '\n')
         filer.write('IP Address: ' + ip + '\n')
         filer.write('IOS Version: ' + version[0] + '\n')
@@ -140,9 +152,9 @@ def callmebaby(ip, username, password):
         call.write(password + '\n')
         sleep(1)
         print '[+] Login Success.'
-        if(call.read_until('>',2).find('>') != -1):
-            call.write('aitadmin'+'\n')
-        # !===================================================
+##        if(call.read_until('>',2).find('>') != -1):
+##            call.write('aitadmin'+'\n')
+##        # !===================================================
         call.write('terminal length 0'+'\n')
         call.write('!==== KickmeOn'+'\n')
         call.write('show interface status'+'\n')
@@ -151,7 +163,7 @@ def callmebaby(ip, username, password):
         call.write('show version | include uptime is'+'\n')
         call.write('!==== HitmeOn'+'\n')
         call.write('show processes cpu | include CPU utilization'+'\n')
-        call.write('show processes memory | include Processor Pool'+'\n')
+        call.write('show processes memory | include Total'+'\n')
         call.write('!==== HitmeOff'+'\n')
         call.write('terminal length 24'+'\n')
         call.write('exit'+'\n')
@@ -164,18 +176,16 @@ def callmebaby(ip, username, password):
         vers = get_version(plaintext)
         process = get_process(plaintext)
         writefile(ip , hostname , int_status , vers , process)
-        print '[+] Analyze Log Success.'
+        print '[+] Analyze Log Success' + str(ip)
     except IOError,ImportError:
-        print '[-] Can not Telnet : ' + str(ip) + '.'
+        print '[-] Can not Telnet : ' + str(ip)
     
-
-
 def get_ip():
     filesName = glob('*.txt')
     all_ip = []
     for fil in filesName:
         text = open(fil , 'r')
-        device_ip = text.read().split('\r\n')
+        device_ip = text.read().split('\n')
         if(len(device_ip) != 0):
             all_ip.append(device_ip)
         else:
@@ -189,3 +199,5 @@ if __name__ == '__main__':
         if(ipl is not 'Null'):
             for ip in ipl:
                 callmebaby(ip, username, password)
+            #======= End ip loop ========
+    #======= End file loop ========
