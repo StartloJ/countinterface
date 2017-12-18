@@ -87,7 +87,7 @@ def calc_process(hostname , cpu , mem):
         perc = perc[:perc.find('%')]
         result += int(perc)
     result_cpu = result/len(cpus)
-    if('DS' in hostname):
+    if('DS' in hostname or 'ASS' in hostname or 'ASCS' in hostname):
         mem_use = mem[mem.find('total') : mem.find('used')]
         mem_use = only_integer(mem_use)
         mem_total = mem[mem.find('memory') : mem.find('total')]
@@ -214,8 +214,8 @@ def get_ip():
     return all_ip
 
 
-username = str(b64decode('c2FrcmFwZWU='))
-password = str(b64decode('c2FrcmFwZWU0MQ=='))
+username = 'ait'
+password = 'aitadmin'
 if __name__ == '__main__':
     for ipl in get_ip():
         if(ipl is not 'Null'):
