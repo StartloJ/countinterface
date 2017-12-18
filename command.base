@@ -1,0 +1,7 @@
+show interface status
+show version | include Cisco IOS Software
+show version | include uptime is
+show processes cpu | include CPU utilization
+show processes memory | include Processor Pool
+show processes memory | include System memory
+show processes memory | include Total:
